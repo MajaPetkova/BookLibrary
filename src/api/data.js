@@ -22,7 +22,7 @@ export async function editBook(id, book) {
 export async function deleteBook(id) {
     return api.del('/data/books/' + id)
 }
-//za bonusa
+
 export async function likeBook(bookId) {
     return api.post('/data/likes', {
         bookId

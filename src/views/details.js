@@ -1,8 +1,8 @@
-import { deleteBook, getAllBooks, getBookById, getLikesByBookId, getMyLikeByBookId } from '../api/data.js';
+import { deleteBook, getAllBooks, getBookById, getLikesByBookId, getMyLikeByBookId, likeBook } from '../api/data.js';
 import { html } from '../lib.js'
 import { getUserData } from '../util.js';
 
-const detailsTemplate = (book, isOwner, onDelete, likes, hasLike) => html `
+const detailsTemplate = (book, isOwner, onDelete, likes, showLikeBtn, onLike) => html `
 <section id="details-page" class="details">
 <div class="book-information">
     <h3>${book.title}</h3>
@@ -10,7 +10,7 @@ const detailsTemplate = (book, isOwner, onDelete, likes, hasLike) => html `
     <p class="img"><img src=${book.imageUrl}></p>
     <div class="actions">
        ${bookControlTemplate(book, isOwner, onDelete)}
-       ${likeControlTemplate(isOwner,hasLike)} 
+       ${likeControlTemplate(showLikeBtn, onLike)} 
       
         <div class="likes">
             <img class="hearts" src="/images/heart.png">
@@ -27,7 +27,7 @@ const detailsTemplate = (book, isOwner, onDelete, likes, hasLike) => html `
 
 const bookControlTemplate = (book, isOwner, onDelete) => {
     if (isOwner) {
-        return html `<!-- Edit/Delete buttons ( Only for creator of this book )  -->
+        return html `
         <a class="button" href="/edit/${book._id}">Edit</a>
         <a @click=${onDelete} class="button" href="javascript:void(0)">Delete</a>`
     } else {
@@ -36,18 +36,17 @@ const bookControlTemplate = (book, isOwner, onDelete) => {
 };
 
 
-const likeControlTemplate = (isOwner, hasLike) => {
-    if (isOwner || hasLike) {
-        return null
+const likeControlTemplate = (showLikeBtn, onLike) => {
+    if (showLikeBtn) {
+        return html `<a @click=${onLike} class="button" href="javascript:void(0)">Like</a>`
     } else {
-        return html `<a class="button" href="javascript:void(0)">Like</a>`
+        return null
     }
 }
 
 export async function detailsPage(ctx) {
-    // const book = await getBookById(ctx.params.id); //koga ne prajme za bonus
-    const userData = getUserData()
-
+    const userData = getUserData();
+ 
     const [book, likes, hasLike] = await Promise.all([
         getBookById(ctx.params.id),
         getLikesByBookId(ctx.params.id),
@@ -55,15 +54,19 @@ export async function detailsPage(ctx) {
     ])
     console.log(book, likes, hasLike)
     const isOwner = userData && userData.id == book._ownerId;
+    const showLikeBtn=userData != null && isOwner == false && hasLike == false ;
 
-
-    ctx.render(detailsTemplate(book, isOwner, onDelete, likes, hasLike))
+    ctx.render(detailsTemplate(book, isOwner, onDelete, likes, showLikeBtn, onLike))
 
     async function onDelete() {
-        const choise = confirm(`Sind Sie sicher, dass Sie loeschen wollen ${book.title}?`);
-        if (choise) {
+        const choice = confirm(`Sind Sie sicher, dass Sie loeschen wollen ${book.title}?`);
+        if (choice) {
             await deleteBook(ctx.params.id);
             ctx.page.redirect('/')
         }
+    }
+    async function onLike(){
+     await likeBook(ctx.params.id);
+     ctx.page.redirect('/details/' + ctx.params.id)
     }
 }
