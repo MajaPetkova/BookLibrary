@@ -8,6 +8,7 @@ import { homePage } from './views/home.js';
 import { loginPage } from './views/login.js';
 import { myBooksPage } from './views/my-books.js';
 import { registerPage } from './views/register.js';
+import { searchPage } from './views/search.js';
 
 // import * as api from './api/data.js';
 // window.api = api;
@@ -24,6 +25,7 @@ page('/create', createPage)
 page('/details/:id', detailsPage)
 page('/edit/:id', editPage)
 page('/my-books', myBooksPage)
+page("/search", searchPage)
 
 updateUserNav();
 page.start()

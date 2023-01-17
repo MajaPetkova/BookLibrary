@@ -34,6 +34,11 @@ export async function getLikesByBookId(bookId) {
 export async function getMyLikeByBookId(bookId, userId) {
     return api.get(`/data/likes?where=bookId%3D%22${bookId}%22%20and%20_ownerId%3D%22${userId}%22&count`)
 }
-window.likeBook = likeBook;
-window.getLikesByBookId = getLikesByBookId;
-window.getMyLikeByBookId = getMyLikeByBookId;
+
+export async function searchBooks(query){
+    return api.get(`/data/books?where=` + encodeURIComponent(`title LIKE "${query}"`))
+}
+
+// window.likeBook = likeBook;
+// window.getLikesByBookId = getLikesByBookId;
+// window.getMyLikeByBookId = getMyLikeByBookId;
